@@ -1,11 +1,15 @@
 {
-  "name": "nestx",
+  "name": "nestx-monorepo",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "docs/*",
+    "app/*",
     "packages/*"
   ],
-  "scripts": {},
+  "scripts": {
+    "docs:dev": "pnpm --filter docs docs:dev",
+    "docs:build": "pnpm --filter docs docs:build"
+  },
   "devDependencies": {
     "fs-extra": "^11.1.1",
     "inquirer": "^9.2.7",
