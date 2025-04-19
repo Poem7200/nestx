@@ -27,7 +27,7 @@ const main = async () => {
     ]);
 
     // Fix the template path to point to root apps directory
-    const templateDir = path.resolve(__dirname, "../../../apps", templateName);
+    const templateDir = path.resolve(__dirname, "../../../app", templateName);
     const targetDir = path.resolve(process.cwd(), projectName);
 
     // Verify template directory exists
