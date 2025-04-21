@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { setCors } from 'src/common/config/cors.config';
+import { AllExceptionFilter } from 'src/common/filters/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,8 @@ async function bootstrap() {
 
   // set CORS
   setCors(app);
+
+  app.useGlobalFilters(new AllExceptionFilter());
 
   await app.listen(port);
 }
