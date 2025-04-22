@@ -1,4 +1,4 @@
 packages:
   - docs
-  - app/*
+  - apps/*
   - packages/*
