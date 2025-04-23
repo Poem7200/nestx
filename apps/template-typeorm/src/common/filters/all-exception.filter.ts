@@ -1,5 +1,6 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
@@ -18,6 +19,15 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
+    if (exception instanceof BadRequestException) {
+      response.status(httpStatus).json(exception.getResponse());
+    } else {
+      response.status(httpStatus).json({
+        code: httpStatus,
+        message: `Service Error: ${exception}`,
+      });
+    }
+
     const responseBody = {
       headers: request.headers,
       query: request.query,
@@ -28,6 +38,6 @@ export class AllExceptionFilter implements ExceptionFilter {
       error: exception['response'] || 'Internal Server Error',
     };
 
-    response.status(httpStatus).json(responseBody);
+    // response.status(httpStatus).json(responseBody);
   }
 }
