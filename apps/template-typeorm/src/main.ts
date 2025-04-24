@@ -2,11 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionFilter } from 'src/common/filters/all-exception.filter';
-import { setCors } from 'src/common/config/cors.config';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+    logger: ['error', 'warn', 'log', 'verbose', 'debug'],
+  });
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
@@ -14,8 +16,6 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionFilter());
 
   app.useGlobalInterceptors(new ResponseInterceptor());
-
-  setCors(app);
 
   await app.listen(port);
 }
