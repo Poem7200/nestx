@@ -9,4 +9,6 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  // 模板项目需要的是给一些示例，而非大量的内容
 }
