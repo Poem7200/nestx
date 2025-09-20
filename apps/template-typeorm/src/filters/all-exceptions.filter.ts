@@ -35,14 +35,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const body = {
       code: status,
       message,
-      path: request?.url,
-      timestamp: new Date().toISOString(),
-      // 追加请求上下文字段
-      headers: request?.headers,
-      query: request?.query,
-      body: request?.body,
-      params: request?.params,
-      ip: request ? requestIp.getClientIp(request) : undefined,
+      error: {
+        path: request?.url,
+        timestamp: new Date().toISOString(),
+        // 追加请求上下文字段
+        headers: request?.headers,
+        query: request?.query,
+        body: request?.body,
+        params: request?.params,
+        ip: request ? requestIp.getClientIp(request) : undefined,
+      },
     };
 
     response.status(status).json(body);
