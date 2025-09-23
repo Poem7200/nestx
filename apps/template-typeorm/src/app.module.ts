@@ -17,7 +17,23 @@ import { AppService } from './app.service';
       ],
       expandVariables: true,
     }),
-    LoggerModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV === 'development'
+            ? {
+                target: 'pino-pretty',
+                options: {
+                  colorize: true, // 启用颜色
+                  singleLine: false, // 多行输出
+                  translateTime: 'SYS:standard', // 时间格式
+                  ignore: 'pid,hostname', // 忽略的字段
+                  messageFormat: '{method} {url} - {msg}', // 自定义消息格式
+                },
+              }
+            : undefined,
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
