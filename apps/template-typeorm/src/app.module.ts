@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -34,6 +37,22 @@ import { AppService } from './app.service';
             : undefined,
       },
     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: configService.get<'mysql'>('DB_TYPE', 'mysql'),
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: configService.get<number>('DB_PORT', 3307),
+        username: configService.get<string>('DB_USERNAME', 'nestx_user'),
+        password: configService.get<string>('DB_PASSWORD', 'nestx_pass'),
+        database: configService.get<string>('DB_DATABASE', 'nestx_db'),
+        entities: [User],
+        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', true),
+        logging: configService.get<boolean>('DB_LOGGING', false),
+      }),
+      inject: [ConfigService],
+    }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
