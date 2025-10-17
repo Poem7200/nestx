@@ -6,8 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  HttpCode,
-  HttpStatus,
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -30,7 +28,6 @@ export class UsersController {
   }
 
   @Post('create')
-  @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -41,7 +38,6 @@ export class UsersController {
   }
 
   @Delete('delete/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }
