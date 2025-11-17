@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -30,6 +31,22 @@ export class UsersController {
   @Post('create')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    const existsByUsername = await this.usersService.findByUsername(createUserDto.username);
+    if (existsByUsername) {
+      throw new BadRequestException('用户名已存在');
+    }
+
+    const existsByEmail = await this.usersService.findByEmail(createUserDto.email);
+    if (existsByEmail) {
+      throw new BadRequestException('邮箱已存在');
+    }
+
+    await this.usersService.create(createUserDto);
+    return true;
   }
 
   @Patch('update/:id')
