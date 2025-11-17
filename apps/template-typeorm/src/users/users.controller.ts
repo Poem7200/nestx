@@ -13,6 +13,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -52,6 +53,14 @@ export class UsersController {
   @Patch('update/:id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @Patch('change-password/:id')
+  async changePassword(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return await this.usersService.changePassword(id, changePasswordDto);
   }
 
   @Delete('delete/:id')
