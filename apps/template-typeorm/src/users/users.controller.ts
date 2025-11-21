@@ -9,15 +9,21 @@ import {
   Query,
   ParseIntPipe,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { AuthService } from '../modules/auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get('list')
   findAll() {
@@ -48,6 +54,33 @@ export class UsersController {
 
     await this.usersService.create(createUserDto);
     return true;
+  }
+
+  @Post('login')
+  async login(@Body() loginDto: LoginDto) {
+    // 查找用户
+    const user = await this.usersService.findByUsername(loginDto.username);
+    if (!user) {
+      throw new UnauthorizedException('用户名或密码错误');
+    }
+
+    // 验证密码
+    const isPasswordValid = await this.usersService.validatePassword(
+      loginDto.password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('用户名或密码错误');
+    }
+
+    // 生成 JWT token（使用 id 和 username 作为 payload）
+    const payload = {
+      id: user.id,
+      username: user.username,
+    };
+
+    return this.authService.generateToken(payload);
   }
 
   @Patch('update/:id')
