@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 
-export interface JwtPayload {
+export interface JwtPayload extends BaseJwtPayload {
   id: number;
   username: string;
 }

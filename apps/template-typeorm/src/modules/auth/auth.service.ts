@@ -1,19 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './auth.strategy';
 import { ConfigService } from '@nestjs/config';
 
 export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 @Injectable()
 export class AuthService {
+  private readonly accessTokenExpiresIn: number;
+  private readonly refreshTokenExpiresIn: number;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.accessTokenExpiresIn = this.resolveExpiresIn('JWT_ACCESS_EXPIRES_IN', 60 * 60 * 8);
+    this.refreshTokenExpiresIn = this.resolveExpiresIn('JWT_REFRESH_EXPIRES_IN', 60 * 60 * 24 * 7);
+  }
 
   /**
    * 生成 JWT token
@@ -21,12 +27,46 @@ export class AuthService {
    * @returns JWT token
    */
   generateToken(payload: JwtPayload): LoginResponse {
-    // TODO: 这里的过期时间应该从配置中读取
-    const access_token = this.jwtService.sign(payload, { expiresIn: '1h' });
-    const refresh_token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: this.accessTokenExpiresIn });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: this.refreshTokenExpiresIn,
+    });
     return {
-      access_token,
-      refresh_token,
+      accessToken,
+      refreshToken,
     };
+  }
+
+  /**
+   * 使用 refresh token 重新获取新的 token
+   */
+  refreshToken(refreshToken: string): LoginResponse {
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(refreshToken);
+      const tokens = this.generateToken({
+        id: payload.id,
+        username: payload.username,
+      });
+      return tokens;
+    } catch {
+      throw new UnauthorizedException('refresh token 无效或已过期');
+    }
+  }
+
+  /**
+   * 将配置中的过期时间解析为秒
+   */
+  private resolveExpiresIn(envKey: string, defaultValue: number): number {
+    const value = this.configService.get<string | number>(envKey);
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return defaultValue;
   }
 }
