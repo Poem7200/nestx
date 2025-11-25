@@ -6,6 +6,8 @@ import { ConfigService } from '@nestjs/config';
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
+  accessTokenExpiresIn: number;
+  refreshTokenExpiresIn: number;
 }
 
 @Injectable()
@@ -31,9 +33,14 @@ export class AuthService {
     const refreshToken = this.jwtService.sign(payload, {
       expiresIn: this.refreshTokenExpiresIn,
     });
+    const now = Date.now();
+    const accessTokenExpiresIn = now + this.accessTokenExpiresIn * 1000;
+    const refreshTokenExpiresIn = now + this.refreshTokenExpiresIn * 1000;
     return {
       accessToken,
       refreshToken,
+      accessTokenExpiresIn,
+      refreshTokenExpiresIn,
     };
   }
 
